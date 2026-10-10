@@ -1,83 +1,32 @@
+import {
+  validateAndPriceItems,
+  generateOrderCode,
+  persistOrder,
+  decrementStock,
+  buildWaUrl,
+} from '../services/order.service.js';
 import { supabase } from '../config/supabase.js';
 import { httpError } from '../middleware/errorHandler.js';
-import { env } from '../config/env.js';
-
-/**
- * Generate kode pesanan unik: ORD-<base36 timestamp>
- */
-function generateCode() {
-  return 'ORD-' + Date.now().toString(36).toUpperCase();
-}
-
-/**
- * Susun pesan WhatsApp dari detail pesanan.
- */
-function buildWaMessage(code, customer, lines, total) {
-  const itemLines = lines
-    .map((l) => `  • ${l.name} x${l.qty} = Rp${(l.price * l.qty).toLocaleString('id-ID')}`)
-    .join('\n');
-
-  return (
-    `*Pesanan Baru – ${code}*\n` +
-    `Nama: ${customer.customer_name}\n` +
-    `Telp: ${customer.customer_phone}\n` +
-    `Pengiriman: ${customer.delivery_method === 'delivery' ? 'Diantar' : 'Ambil Sendiri'}\n` +
-    (customer.address ? `Alamat: ${customer.address}\n` : '') +
-    (customer.note ? `Catatan: ${customer.note}\n` : '') +
-    `\nDetail Pesanan:\n${itemLines}\n` +
-    `\n*Total: Rp${total.toLocaleString('id-ID')}*`
-  );
-}
 
 /** POST /api/orders */
 export async function createOrder(req, res, next) {
   try {
     const { customer_name, customer_phone, delivery_method, address, note, items } = req.body;
+    const customer = { customer_name, customer_phone, delivery_method, address, note };
 
-    // 1. Ambil data produk dari DB (harga & stok sumber kebenaran ada di server)
-    const ids = items.map((i) => i.product_id);
-    const { data: products, error: prodErr } = await supabase
-      .from('products')
-      .select('id, name, price, stock')
-      .in('id', ids)
-      .eq('is_active', true);
+    // Validasi stok & hitung ulang harga di server
+    const { lines, total } = await validateAndPriceItems(items);
 
-    if (prodErr) throw httpError(500, prodErr.message);
+    const code = generateOrderCode();
 
-    // 2. Validasi stok & susun baris pesanan
-    const lines = items.map((item) => {
-      const p = products.find((x) => x.id === item.product_id);
-      if (!p) throw httpError(400, `Produk dengan ID ${item.product_id} tidak ditemukan.`);
-      if (p.stock < item.qty) throw httpError(400, `Stok ${p.name} tidak mencukupi.`);
-      return { product_id: p.id, name: p.name, price: p.price, qty: item.qty };
-    });
+    // Simpan order & order_items
+    await persistOrder({ customer, lines, total, code });
 
-    // 3. Hitung total
-    const total = lines.reduce((sum, l) => sum + l.price * l.qty, 0);
-    const code = generateCode();
+    // Kurangi stok (non-blocking jika gagal, pesanan tetap berhasil)
+    await decrementStock(lines);
 
-    // 4. Simpan pesanan ke DB
-    const { data: order, error: orderErr } = await supabase
-      .from('orders')
-      .insert({ code, customer_name, customer_phone, delivery_method, address, note, total })
-      .select()
-      .single();
-
-    if (orderErr) throw httpError(500, orderErr.message);
-
-    // 5. Simpan order_items
-    const orderItems = lines.map((l) => ({ ...l, order_id: order.id }));
-    const { error: itemsErr } = await supabase.from('order_items').insert(orderItems);
-    if (itemsErr) throw httpError(500, itemsErr.message);
-
-    // 6. Kurangi stok produk
-    for (const l of lines) {
-      await supabase.rpc('decrement_stock', { p_id: l.product_id, p_qty: l.qty });
-    }
-
-    // 7. Susun URL WhatsApp
-    const waMessage = buildWaMessage(code, { customer_name, customer_phone, delivery_method, address, note }, lines, total);
-    const waUrl = `https://wa.me/${env.WA_NUMBER}?text=${encodeURIComponent(waMessage)}`;
+    // Susun URL WhatsApp
+    const waUrl = buildWaUrl(code, customer, lines, total);
 
     res.status(201).json({ code, total, waUrl });
   } catch (err) {
