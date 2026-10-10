@@ -1,0 +1,71 @@
+:root {
+  /* Palet Warna 60 / 30 / 10 Earth Tone */
+  --cream-100: #FDFBF7; /* 60% Latar dasar halaman & kartu */
+  --cream-200: #F5EFE6; /* Latar selang, input, hover kartu */
+  --cream-300: #E8DFD2; /* Garis pembatas & border */
+
+  --brown-900: #4A3B32; /* 30% Teks utama, judul, footer */
+  --brown-600: #6B5A4E; /* Teks sekunder, keterangan */
+  --brown-400: #938276; /* Placeholder & teks pelengkap */
+
+  --green-600: #556B2F; /* 10% Aksen tombol aksi utama & link aktif */
+  --green-700: #44561F; /* Aksen saat tombol di-hover atau ditekan */
+  --green-100: #EEF1E6; /* Latar badge status produk tersedia */
+
+  --danger-600: #A23B2A; /* Indikator stok habis & pesan galat */
+  --danger-100: #F9EBE8; /* Latar badge stok habis */
+
+  /* Peran Semantik */
+  --color-bg: var(--cream-100);
+  --color-surface: var(--cream-200);
+  --color-border: var(--cream-300);
+  --color-text: var(--brown-900);
+  --color-text-muted: var(--brown-600);
+  --color-accent: var(--green-600);
+  --color-accent-hover: var(--green-700);
+  --color-danger: var(--danger-600);
+
+  /* Tipografi */
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Skala Ukuran Font Fluid */
+  --fs-display: clamp(2rem, 4.5vw, 3.25rem);
+  --fs-h1: clamp(1.75rem, 3.5vw, 2.5rem);
+  --fs-h2: clamp(1.4rem, 2.75vw, 2rem);
+  --fs-h3: clamp(1.15rem, 2vw, 1.35rem);
+  --fs-body: 1rem;
+  --fs-small: 0.875rem;
+  --fs-tiny: 0.75rem;
+
+  /* Spasi Skala Konsisten */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* Radius Kurva */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+
+  /* Bayangan Bernuansa Cokelat Hangat */
+  --shadow-sm: 0 1px 3px rgba(74, 59, 50, 0.06);
+  --shadow-card: 0 4px 16px rgba(74, 59, 50, 0.07);
+  --shadow-hover: 0 8px 24px rgba(74, 59, 50, 0.12);
+  --shadow-modal: 0 16px 40px rgba(74, 59, 50, 0.2);
+
+  /* Dimensi Layout */
+  --container-max: 1200px;
+  --header-height: 72px;
+  --transition-fast: 150ms ease;
+  --transition-normal: 220ms ease;
+}
