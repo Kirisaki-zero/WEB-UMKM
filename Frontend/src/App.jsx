@@ -28,7 +28,7 @@ function PublicLayout() {
   return (
     <>
       <Navbar />
-      <main style={{ flex: 1 }}>
+      <main id="main-content" style={{ flex: 1 }}>
         <Outlet />
       </main>
       <Footer />

@@ -1,4 +1,7 @@
 :root {
+  /* Deklarasi Tema Terang Web Platform */
+  color-scheme: light;
+
   /* Palet Warna 60 / 30 / 10 Earth Tone */
   --cream-100: #FDFBF7; /* 60% Latar dasar halaman & kartu */
   --cream-200: #F5EFE6; /* Latar selang, input, hover kartu */

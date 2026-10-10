@@ -181,6 +181,11 @@
   outline: none;
 }
 
+.form-input:user-invalid, .form-textarea:user-invalid {
+  border-color: var(--color-danger);
+  background-color: var(--danger-100);
+}
+
 .form-textarea {
   resize: vertical;
   min-height: 100px;

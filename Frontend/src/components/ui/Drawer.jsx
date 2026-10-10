@@ -7,14 +7,19 @@ export function Drawer({ isOpen, onClose, title, children }) {
         onClose();
       }
     };
+    const mainEl = document.getElementById('main-content');
+
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      if (mainEl) mainEl.setAttribute('inert', '');
       window.addEventListener('keydown', handleKeyDown);
     } else {
       document.body.style.overflow = '';
+      if (mainEl) mainEl.removeAttribute('inert');
     }
     return () => {
       document.body.style.overflow = '';
+      if (mainEl) mainEl.removeAttribute('inert');
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isOpen, onClose]);
