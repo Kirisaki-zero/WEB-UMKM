@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 const origins = env.CORS_ORIGINS.split(',').map((o) => o.trim());
@@ -57,11 +58,6 @@ app.use((_req, res) => {
 });
 
 // ── Global Error Handler ─────────────────────────────────────────────────────
-// TODO: Ganti dengan errorHandler middleware setelah dibuat
-app.use((err, _req, res, _next) => {
-  const status = err.status || 500;
-  console.error(`[error] ${status} – ${err.message}`);
-  res.status(status).json({ message: err.message || 'Terjadi kesalahan server.' });
-});
+app.use(errorHandler);
 
 export default app;
