@@ -37,20 +37,19 @@ app.get('/api/health', (_req, res) => res.json({ ok: true, env: env.NODE_ENV }))
 app.use(['/api/orders', '/api/messages'], writeLimiter);
 
 // ── Routes ───────────────────────────────────────────────────────────────────
-// TODO: Daftarkan routes di sini setelah dibuat
-// import productsRoutes from './routes/products.routes.js';
-// import categoriesRoutes from './routes/categories.routes.js';
-// import ordersRoutes from './routes/orders.routes.js';
-// import messagesRoutes from './routes/messages.routes.js';
-// import settingsRoutes from './routes/settings.routes.js';
-// import uploadRoutes from './routes/upload.routes.js';
-//
-// app.use('/api/products', productsRoutes);
-// app.use('/api/categories', categoriesRoutes);
-// app.use('/api/orders', ordersRoutes);
-// app.use('/api/messages', messagesRoutes);
-// app.use('/api/settings', settingsRoutes);
-// app.use('/api/upload', uploadRoutes);
+import productsRoutes from './routes/products.routes.js';
+import categoriesRoutes from './routes/categories.routes.js';
+import ordersRoutes from './routes/orders.routes.js';
+import messagesRoutes from './routes/messages.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
+
+app.use('/api/products', productsRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/messages', messagesRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // ── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((_req, res) => {
