@@ -1,0 +1,25 @@
+# Catatan versi internal & aturan agent
+changelog/
+GEMINI.md
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment (berisi kunci rahasia)
+.env
+.env.*
+!.env.example
+
+# Log
+*.log
+npm-debug.log*
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
