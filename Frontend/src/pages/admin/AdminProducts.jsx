@@ -9,6 +9,9 @@ export function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
+
   const loadProducts = async () => {
     setIsLoading(true);
     try {
@@ -32,6 +35,17 @@ export function AdminProducts() {
     }
   };
 
+  const filteredProducts = products.filter((p) => {
+    const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          p.category_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesCategory = selectedCategory === 'Semua' || p.category_name === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = ['Semua', ...new Set(products.map((p) => p.category_name).filter(Boolean))];
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-6)' }}>
@@ -46,6 +60,45 @@ export function AdminProducts() {
         <Link to="/admin/produk/baru">
           <Button variant="primary">+ Tambah Produk</Button>
         </Link>
+      </div>
+
+      <div style={{ display: 'flex', gap: '12px', marginBottom: 'var(--space-4)', flexWrap: 'wrap' }}>
+        <input
+          type="text"
+          placeholder="🔍 Cari nama atau kategori produk..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            flex: '1',
+            minWidth: '240px',
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+            backgroundColor: 'var(--cream-100)',
+            color: 'var(--brown-900)',
+            fontSize: 'var(--fs-small)'
+          }}
+        />
+
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          style={{
+            padding: '10px 14px',
+            borderRadius: 'var(--radius-md)',
+            border: '1px solid var(--color-border)',
+            backgroundColor: 'var(--cream-100)',
+            color: 'var(--brown-900)',
+            fontSize: 'var(--fs-small)',
+            cursor: 'pointer'
+          }}
+        >
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat}>
+              {cat === 'Semua' ? 'Semua Kategori' : cat}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div
@@ -83,7 +136,7 @@ export function AdminProducts() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
+                {filteredProducts.map((p) => (
                   <tr key={p.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                     <td style={{ padding: '12px 16px', width: '60px' }}>
                       <img
