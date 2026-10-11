@@ -11,25 +11,37 @@ export function AdminProductForm() {
 
   const [categories, setCategories] = useState([]);
   const [formData, setFormData] = useState({
+    id: null,
     name: '',
-    category_id: 2,
-    category_name: 'Kopi & Minuman',
-    price: 50000,
-    stock: 10,
+    category_id: '',
+    category_name: '',
+    price: '',
+    stock: '',
     imageUrl: '',
     description: '',
     is_featured: false,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     async function loadInitial() {
       const catList = await api.getCategories();
-      setCategories(catList.filter(c => c.slug !== 'semua'));
+      const filteredCategories = Array.isArray(catList) ? catList.filter((c) => c.slug !== 'semua') : [];
+      setCategories(filteredCategories);
+
+      if (!isEditMode && filteredCategories.length > 0) {
+        setFormData((prev) => ({
+          ...prev,
+          category_id: filteredCategories[0].id,
+          category_name: filteredCategories[0].name,
+        }));
+      }
 
       if (isEditMode) {
         const prodList = await api.getProducts();
         const found = prodList.find((p) => p.id === Number(id));
+
         if (found) {
           setFormData({
             id: found.id,
@@ -45,6 +57,7 @@ export function AdminProductForm() {
         }
       }
     }
+
     loadInitial();
   }, [id, isEditMode]);
 
@@ -60,29 +73,33 @@ export function AdminProductForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name.trim() || formData.price < 0 || formData.stock < 0) {
-      alert('Mohon isi nama produk, harga, dan stok dengan benar.');
-      return;
-    }
-
     setIsSaving(true);
+
     try {
-      const payload = {
-        ...(isEditMode ? { id: Number(id) } : {}),
+      let finalImageUrl = formData.imageUrl || '';
+
+      if (imageFile) {
+        finalImageUrl = await api.uploadProductImage(imageFile);
+      }
+
+      const productPayload = {
+        ...formData,
+        id: formData.id,
         name: formData.name.trim(),
-        category_id: formData.category_id,
-        category_name: formData.category_name,
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-        images: formData.imageUrl.trim() ? [formData.imageUrl.trim()] : ['https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80'],
+        category_id: Number(formData.category_id),
+        category_name: formData.category_name || categories.find((c) => c.id === Number(formData.category_id))?.name || 'Kopi & Minuman',
+        price: Number(formData.price || 0),
+        stock: Number(formData.stock || 0),
         description: formData.description.trim(),
-        is_featured: formData.is_featured,
+        is_featured: !!formData.is_featured,
+        images: finalImageUrl ? [finalImageUrl] : ['https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=80'],
       };
 
-      await api.saveProduct(payload);
+      await api.saveProduct(productPayload);
+      alert('Produk berhasil disimpan!');
       navigate('/admin/produk');
     } catch (err) {
-      console.error('Gagal menyimpan produk:', err);
+      console.error('Error saat menyimpan:', err);
       alert('Terjadi kesalahan saat menyimpan produk.');
     } finally {
       setIsSaving(false);
@@ -156,14 +173,38 @@ export function AdminProductForm() {
             />
           </div>
 
+          <div className="form-group" style={{ marginBottom: 'var(--space-4)' }}>
+            <label htmlFor="prod-file" className="form-label">Unggah Foto dari Komputer:</label>
+            <input
+              id="prod-file"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  const file = e.target.files[0];
+                  setImageFile(file);
+                  setFormData({ ...formData, imageUrl: URL.createObjectURL(file) });
+                }
+              }}
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: 'var(--space-2)',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border)',
+                backgroundColor: '#fff',
+              }}
+            />
+          </div>
+
           <Input
-            label="URL Foto Produk"
+            label="Atau URL Foto Produk (Opsional)"
             id="prod-img"
             type="url"
             value={formData.imageUrl}
             onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
             placeholder="https://images.unsplash.com/..."
-            helperText="Gunakan URL gambar publik atau kosongkan untuk gambar contoh alami"
+            helperText="Gunakan URL gambar publik atau unggah file di atas"
           />
 
           {formData.imageUrl && (
