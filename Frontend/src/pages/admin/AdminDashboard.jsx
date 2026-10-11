@@ -21,6 +21,7 @@ export function AdminDashboard() {
   const totalOmset = orders.reduce((sum, item) => sum + (item.total || 0), 0);
   const lowStockProducts = products.filter((p) => p.stock <= 5);
   const recentOrders = orders.slice(0, 5);
+  const newOrders = orders.filter((o) => (o.status || 'baru') === 'baru');
 
   return (
     <div>
@@ -94,8 +95,26 @@ export function AdminDashboard() {
             {lowStockProducts.map((lp) => (
               <li key={lp.id}>
                 {lp.name} (Sisa stok: <strong>{lp.stock}</strong>) -{' '}
-                <Link to={`/admin/produk/edit/${lp.id}`} style={{ textDecoration: 'underline', color: 'var(--color-accent)' }}>
+                <Link to={`/admin/produk/edit/${lp.id}`} style={{ textDecoration: 'underline', color: 'var(--color-accent)', fontWeight: 600 }}>
                   Perbarui Stok
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {newOrders.length > 0 && (
+        <div style={{ backgroundColor: 'var(--cream-200, #f7efe5)', border: '1px solid rgba(140,109,72,0.3)', padding: 'var(--space-4) var(--space-6)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-8)' }}>
+          <strong style={{ color: 'var(--color-accent)', display: 'block', marginBottom: 'var(--space-2)' }}>
+            🔔 Perhatian: Terdapat {newOrders.length} pesanan baru yang belum diproses:
+          </strong>
+          <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', color: 'var(--color-text)', fontSize: 'var(--fs-small)' }}>
+            {newOrders.map((ord) => (
+              <li key={ord.id} style={{ marginBottom: '4px' }}>
+                <strong>{ord.code}</strong> — {ord.customer_name} ({formatRupiah(ord.total)}) -{' '}
+                <Link to="/admin/pesanan" style={{ textDecoration: 'underline', color: 'var(--color-accent)', fontWeight: 600 }}>
+                  Kelola di Daftar Pesanan
                 </Link>
               </li>
             ))}
